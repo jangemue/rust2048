@@ -200,15 +200,30 @@ use self::rand::distributions::{IndependentSample, Range};
         pub fn render(&self) {
             for r in 0..self.length {
                 for c in 0..self.length {
-                    print!(" {} ", self.field[r][c])
+                    print!("+----");
                 }
-                println!("\n")
+                print!("+");
+                print!("\n");
+                print!("|");
+                for c in 0..self.length {
+                    if self.field[r][c] == 0{
+                        print!("    |");
+                    } else {
+                        print!("{:4}|", self.field[r][c]);
+                    }
+                }
+                print!("\n")
             }
+            for c in 0..self.length {
+                print!("+----");
+            }
+            print!("+");
+            print!("\n");
         }
 
         pub fn insert_new(&mut self, command : Command) -> bool {
-            let possible_insert = vec![2,2,2,4];
-            let possible_insert_between = Range::new(0, possible_insert.len() - 1);
+            let possible_insert = vec![2,2,2,2,2,4,4];
+            let possible_insert_between = Range::new(0, possible_insert.len());
             let mut possible_insert_rng = rand::thread_rng();
             let insert = possible_insert[possible_insert_between.ind_sample(&mut possible_insert_rng)];
 
@@ -228,7 +243,7 @@ use self::rand::distributions::{IndependentSample, Range};
                 return false;
             }
 
-            let row_between = Range::new(0, free.len() - 1);
+            let row_between = Range::new(0, free.len());
             let mut row_rng = rand::thread_rng();
             let (row, column) = free[row_between.ind_sample(&mut row_rng)];
 
@@ -239,8 +254,8 @@ use self::rand::distributions::{IndependentSample, Range};
         fn free_fields(&self, top_down : bool, row_first : bool) -> Vec<(usize, usize)> {
             let mut free = Vec::new();
             if row_first && top_down {
-                for row in 0..self.length - 1 {
-                    for column in 0..self.length - 1 {
+                for row in 0..self.length {
+                    for column in 0..self.length {
                         if self.field[row][column] == 0 {
                             free.push((row, column));
                         }
@@ -255,8 +270,8 @@ use self::rand::distributions::{IndependentSample, Range};
                     }
                 }
             } else if !row_first && top_down {
-                for column in 0..(self.length - 1) {
-                    for row in 0..(self.length - 1) {
+                for column in 0..self.length {
+                    for row in 0..self.length {
                         if self.field[row][column] == 0 {
                             free.push((row, column));
                         }
@@ -264,7 +279,7 @@ use self::rand::distributions::{IndependentSample, Range};
                 }
             } else {
                 for column in (0..self.length).rev() {
-                    for row in 0..self.length - 1 {
+                    for row in 0..self.length  {
                         if self.field[row][column] == 0 {
                             free.push((row, column));
                         }
@@ -273,6 +288,10 @@ use self::rand::distributions::{IndependentSample, Range};
             }
 
             free
+        }
+
+        fn can_merge() -> bool {
+            false
         }
     }
 }
