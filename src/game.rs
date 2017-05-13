@@ -290,7 +290,16 @@ use self::rand::distributions::{IndependentSample, Range};
             free
         }
 
-        fn can_merge() -> bool {
+        fn can_merge(&self) -> bool {
+            for x in 0..self.length - 1 {
+                for y in 0..self.length - 1 {
+                    if  self.field[x][y] == self.field[x+1][y]
+                        || self.field[x][y] == self.field[x][y+1] {
+                        return true;
+                    }
+                }
+            }
+
             false
         }
     }
