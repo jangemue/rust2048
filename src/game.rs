@@ -206,7 +206,7 @@ use self::rand::distributions::{IndependentSample, Range};
             }
         }
 
-        pub fn insert_new(&mut self, command : Command) {
+        pub fn insert_new(&mut self, command : Command) -> bool {
             let possible_insert = vec![2,2,2,4];
             let possible_insert_between = Range::new(0, possible_insert.len() - 1);
             let mut possible_insert_rng = rand::thread_rng();
@@ -225,7 +225,7 @@ use self::rand::distributions::{IndependentSample, Range};
             }
 
             if free.is_empty() {
-                return;
+                return false;
             }
 
             let row_between = Range::new(0, free.len() - 1);
@@ -233,6 +233,7 @@ use self::rand::distributions::{IndependentSample, Range};
             let (row, column) = free[row_between.ind_sample(&mut row_rng)];
 
             self.field[row][column] = insert;
+            return true;
         }
 
         fn free_fields(&self, top_down : bool, row_first : bool) -> Vec<(usize, usize)> {
