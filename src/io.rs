@@ -5,11 +5,10 @@ pub mod user_io {
     use std::io;
     use std::io::BufRead;
     use std::thread;
-    use std::convert::AsRef;
 
 
 
-    pub fn start_user_io(g: game_2048::Game) {
+    pub fn start_user_io(mut g: game_2048::Game) {
         let stdin = io::stdin();
         let handle = thread::spawn(move || {
             for line in stdin.lock().lines() {
