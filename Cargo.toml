@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Jan Mühlig <jan.muehlig@udo.edu>","Philip Zweihof <philip.zweihoff@udo.edu>"]
 
 [dependencies]
+rand = "0.3"

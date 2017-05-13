@@ -1,4 +1,6 @@
 pub mod game_2048 {
+extern crate rand;
+use self::rand::distributions::{IndependentSample, Range};
 
     #[derive(PartialEq,Clone,Copy)]
     pub enum Command {
@@ -16,13 +18,17 @@ pub mod game_2048 {
 
     impl Game {
         pub fn new(length: usize) -> Game {
-            let field = vec![vec![0; length]; length];
+            let mut field = vec![vec![0; length]; length];
 
-            Game {
+            let mut game = Game {
                 length: length,
                 score: 0,
                 field: field
-            }
+            };
+            game.insert_new(Command::Up);
+            game.insert_new(Command::Up);
+
+            game
         }
 
         pub fn score(&self) -> u32 {
@@ -198,6 +204,74 @@ pub mod game_2048 {
                 }
                 println!("\n")
             }
+        }
+
+        pub fn insert_new(&mut self, command : Command) {
+            let possible_insert = vec![2,2,2,4];
+            let possible_insert_between = Range::new(0, possible_insert.len() - 1);
+            let mut possible_insert_rng = rand::thread_rng();
+            let insert = possible_insert[possible_insert_between.ind_sample(&mut possible_insert_rng)];
+
+            let mut j = 0;
+            let mut free : Vec<(usize, usize)>;
+            if command == Command::Up {
+                free = self.free_fields(false, true);
+            } else if command == Command::Down {
+                free = self.free_fields(true, true);
+            } else if command == Command::Left {
+                free = self.free_fields(false, false);
+            } else {
+                free = self.free_fields(true, false);
+            }
+
+            if free.is_empty() {
+                return;
+            }
+
+            let row_between = Range::new(0, free.len() - 1);
+            let mut row_rng = rand::thread_rng();
+            let (row, column) = free[row_between.ind_sample(&mut row_rng)];
+
+            self.field[row][column] = insert;
+        }
+
+        fn free_fields(&self, top_down : bool, row_first : bool) -> Vec<(usize, usize)> {
+            let mut free = Vec::new();
+            if row_first && top_down {
+                for row in 0..self.length - 1 {
+                    for column in 0..self.length - 1 {
+                        if self.field[row][column] == 0 {
+                            free.push((row, column));
+                        }
+                    }
+                }
+            } else if row_first && !top_down {
+                for row in (0..self.length).rev() {
+                    for column in (0..self.length).rev() {
+                        if self.field[row][column] == 0 {
+                            free.push((row, column));
+                        }
+                    }
+                }
+            } else if !row_first && top_down {
+                for column in 0..(self.length - 1) {
+                    for row in 0..(self.length - 1) {
+                        if self.field[row][column] == 0 {
+                            free.push((row, column));
+                        }
+                    }
+                }
+            } else {
+                for column in (0..self.length).rev() {
+                    for row in 0..self.length - 1 {
+                        if self.field[row][column] == 0 {
+                            free.push((row, column));
+                        }
+                    }
+                }
+            }
+
+            free
         }
     }
 }
