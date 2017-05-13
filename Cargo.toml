@@ -1,0 +1,6 @@
+[package]
+name = "rust2048"
+version = "0.1.0"
+authors = ["Jan Mühlig <jan.muehlig@udo.edu>"]
+
+[dependencies]
