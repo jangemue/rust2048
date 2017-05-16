@@ -36,6 +36,12 @@ use self::rand::distributions::{IndependentSample, Range};
         }
 
         pub fn command(&mut self, command: Command) {
+            self.on_command(command);
+            self.insert_new(command);
+            self.render();
+        }
+
+        pub fn command2(&mut self, command: Command) {
             let (x_mod,x_start,x_border,y_mod,y_start,y_border, x_first) = self.direction(command);
 
             //get start x dep on direction
@@ -198,6 +204,7 @@ use self::rand::distributions::{IndependentSample, Range};
         }
 
         pub fn render(&self) {
+            println!("Score: {:6}", self.score);
             for r in 0..self.length {
                 for c in 0..self.length {
                     print!("+----");
@@ -301,6 +308,75 @@ use self::rand::distributions::{IndependentSample, Range};
             }
 
             false
+        }
+
+
+        fn on_command(&mut self, cmd : Command) {
+            loop {
+                let mut moved = false;
+                for i in 0..self.length {
+                    for j in 0..self.length {
+                        moved |= self.move_field_guarded(cmd, i, j);
+                    }
+                }
+
+                if !moved {
+                    break;
+                }
+            }
+        }
+
+        fn move_field_guarded(&mut self, cmd : Command, i : usize, j : usize) -> bool {
+            if (cmd == Command::Up && i > 0)
+                || (cmd == Command::Down && i < self.length - 1)
+                || (cmd == Command::Left && j > 0)
+                || (cmd == Command::Right && j < self.length - 1){
+                return self.move_field(cmd, i, j);
+            } else {
+                return false
+            }
+        }
+
+        fn move_field(&mut self, cmd : Command, i : usize, j : usize) -> bool {
+            // Is it a valued field?
+            if self.field[i][j] == 0 {
+                return false
+            }
+
+            // Find neighbour.
+            let (neighbour_i, neighbour_j) = self.get_neighbour_index(cmd, i, j);
+
+            // Could join?
+            let neighbour_value = self.field[neighbour_i][neighbour_j];
+            if neighbour_value == self.field[i][j] {
+                // Set new value to neighbour.
+                self.field[neighbour_i][neighbour_j] = 2 * neighbour_value;
+                // Truncate me.
+                self.field[i][j] = 0;
+                // Add score.
+                self.score += 2 * neighbour_value;
+
+                return true
+            } else if neighbour_value == 0 {    // Is neighbour empty?
+                // Move me to neighbour.
+                self.field[neighbour_i][neighbour_j] = self.field[i][j];
+
+                // Truncate me.
+                self.field[i][j] = 0;
+
+                return true
+            }
+
+            return false
+        }
+
+        fn get_neighbour_index(&self, cmd : Command, i : usize, j : usize) -> (usize, usize) {
+            match cmd {
+                Command::Up => (i-1, j),
+                Command::Down => (i+1, j),
+                Command::Left => (i, j-1),
+                _ => (i, j+1)
+            }
         }
     }
 }
