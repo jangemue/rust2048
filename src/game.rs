@@ -19,8 +19,8 @@ use input::commander::Commander;
                 score: 0,
                 field: field
             };
-            game.insert_new(Command::Up);
-            game.insert_new(Command::Up);
+            game.insert_new();
+            game.insert_new();
 
             game
         }
@@ -29,8 +29,11 @@ use input::commander::Commander;
             loop {
                 let next_command = commander.next_command(self.field.to_vec());
                 self.execute_command(next_command);
-                let game_over = !self.insert_new(next_command) && !self.can_merge();
+                let can_merge = self.can_merge();
+                let insert_new = self.insert_new();
+                let game_over = !can_merge && !insert_new;
                 self.render();
+                println!("Merge: {}  -  New: {}", can_merge, insert_new);
                 if game_over {
                     break;
                 }
@@ -63,79 +66,43 @@ use input::commander::Commander;
             print!("\n");
         }
 
-        pub fn insert_new(&mut self, command : Command) -> bool {
-            let possible_insert = vec![2,2,2,2,2,4,4];
-            let possible_insert_between = Range::new(0, possible_insert.len());
-            let mut possible_insert_rng = rand::thread_rng();
-            let insert = possible_insert[possible_insert_between.ind_sample(&mut possible_insert_rng)];
-
-            let free : Vec<(usize, usize)>;
-            if command == Command::Up {
-                free = self.free_fields(false, true);
-            } else if command == Command::Down {
-                free = self.free_fields(true, true);
-            } else if command == Command::Left {
-                free = self.free_fields(false, false);
-            } else {
-                free = self.free_fields(true, false);
+        pub fn insert_new(&mut self,) -> bool {
+            let mut free = Vec::new();
+            for i in 0..self.length {
+                for j in 0..self.length {
+                    if self.field[i][j] == 0{
+                        free.push((i,j));
+                    }
+                }
             }
 
             if free.is_empty() {
                 return false;
             }
 
+            let insert_between = Range::new(0, 10);
+            let mut insert_rng = rand::thread_rng();
+            let insert = if insert_between.ind_sample(&mut insert_rng) > 7 {
+                4
+            } else {
+                2
+            };
+
             let row_between = Range::new(0, free.len());
             let mut row_rng = rand::thread_rng();
             let (row, column) = free[row_between.ind_sample(&mut row_rng)];
 
             self.field[row][column] = insert;
-            return true;
+
+            true
         }
 
-        fn free_fields(&self, top_down : bool, row_first : bool) -> Vec<(usize, usize)> {
-            let mut free = Vec::new();
-            if row_first && top_down {
-                for row in 0..self.length {
-                    for column in 0..self.length {
-                        if self.field[row][column] == 0 {
-                            free.push((row, column));
-                        }
-                    }
-                }
-            } else if row_first && !top_down {
-                for row in (0..self.length).rev() {
-                    for column in (0..self.length).rev() {
-                        if self.field[row][column] == 0 {
-                            free.push((row, column));
-                        }
-                    }
-                }
-            } else if !row_first && top_down {
-                for column in 0..self.length {
-                    for row in 0..self.length {
-                        if self.field[row][column] == 0 {
-                            free.push((row, column));
-                        }
-                    }
-                }
-            } else {
-                for column in (0..self.length).rev() {
-                    for row in 0..self.length  {
-                        if self.field[row][column] == 0 {
-                            free.push((row, column));
-                        }
-                    }
-                }
-            }
-
-            free
-        }
 
         fn can_merge(&self) -> bool {
-            for x in 0..self.length - 1 {
-                for y in 0..self.length - 1 {
-                    if  self.field[x][y] == self.field[x+1][y]
-                        || self.field[x][y] == self.field[x][y+1] {
+            for x in 0..self.length {
+                for y in 0..self.length {
+                    if  (x < self.length - 1 && self.field[x][y] == self.field[x+1][y])
+                        || (y < self.length - 1 && self.field[x][y] == self.field[x][y+1]) {
                         return true;
                     }
                 }
