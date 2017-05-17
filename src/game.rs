@@ -38,6 +38,7 @@ use input::commander::Commander;
         }
 
         pub fn render(&self) {
+            print!("{}[2J", 27 as char);
             println!("Score: {:6}", self.score);
             for r in 0..self.length {
                 for _ in 0..self.length {
