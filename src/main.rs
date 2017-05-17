@@ -12,9 +12,13 @@ mod input {
 pub fn main() {
 	let mut game = Game::new(4);
 
-	let input = User::new();
-	//let input = RandomAI::new();
-
 	game.render();
-	game.start(&input);
+
+	let which_input = 0;
+	let user = User::new();
+	let random_ai = RandomAI::new();
+	match which_input {
+		0 => game.start(&random_ai),
+		_ => game.start(&user)
+	}
 }
