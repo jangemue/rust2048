@@ -1,10 +1,20 @@
-mod io;
 mod game;
-use io::user_io::start_user_io;
 use game::game_2048::Game;
+use input::user_commander::User;
+use input::random_ai::RandomAI;
+
+mod input {
+	pub mod commander;
+	pub mod user_commander;
+	pub mod random_ai;
+}
 
 pub fn main() {
-	let g = Game::new(4);
-	g.render();
-	start_user_io(g);
+	let mut game = Game::new(4);
+
+	let input = User::new();
+	//let input = RandomAI::new();
+
+	game.render();
+	game.start(&input);
 }
